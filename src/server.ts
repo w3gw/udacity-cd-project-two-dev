@@ -28,14 +28,18 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
   //   the filtered image file [!!TIP res.sendFile(filteredpath); might be useful]
 
   /**************************************************************************** */
-  app.get( "/filteredimage", async ( req, res ) => {
-    const {image_url} = req.query;
+  app.get( "/filteredimage", async ( req:express.Request, res:express.Response ) => {
+    // const image_url:String = req.query.image_url; //This line shows syntax error I am forced to use the next line
+    // I had to parse all variables to String to use them other wise I get a syntax error
+    const image_url: String = req.query.image_url.toString();
 
     if(image_url){
       try{
-        const filteredpath = await filterImageFromURL(image_url.toString());
-        // deleteLocalFiles([filteredpath,""])
-        res.sendFile(filteredpath);
+        const filteredpath:String  = await filterImageFromURL(image_url.toString());//I parsed the image_url to String here
+
+        res.status(200).sendFile(filteredpath.toString(),async ()=>{
+          await deleteLocalFiles([filteredpath.toString(),""],);
+        });
       }catch(error){
         res.status(500).send(error);
       }
